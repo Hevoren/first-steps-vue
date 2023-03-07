@@ -102,7 +102,7 @@ Vue.component('product', {
             return this.variants[this.selectedVariant].variantImage;
         },
 
-        inStock(){
+        inStock() {
             return this.variants[this.selectedVariant].variantQuantity;
         },
 
@@ -110,7 +110,7 @@ Vue.component('product', {
             if (this.onSale) {
                 return this.brand + ' ' + this.product + ' are on sale!'
             }
-            return  this.brand + ' ' + this.product + ' are not on sale'
+            return this.brand + ' ' + this.product + ' are not on sale'
         },
 
         shipping() {
@@ -140,45 +140,6 @@ Vue.component('product-details', {
 })
 
 
-Vue.component('product-review', {
-    template: `
-        <form class="review-form" @submit.prevent="onSubmit">
-            <p>
-                <label for="name">Name:</label>
-                <input id="name" v-model="name" placeholder="name">
-            </p>
-
-            <p>
-                <label for="review">Review:</label>
-                <textarea id="review" v-model="review"></textarea>
-            </p>
-
-            <p>
-                <label for="rating">Rating:</label>
-                <select id="rating" v-model.number="rating">
-                    <option>5</option>
-                    <option>4</option>
-                    <option>3</option>
-                    <option>2</option>
-                    <option>1</option>
-                </select>
-            </p>
-
-            <p>
-                <input type="submit" value="Submit"> 
-            </p>
-        </form>
-
- `,
-    data() {
-        return {
-            name: null
-        }
-    }
-})
-
-
-
 let app = new Vue({
     el: '#app',
     data: {
@@ -196,6 +157,12 @@ let app = new Vue({
         }
     }
 })
+
+
+
+
+
+
 
 
 
