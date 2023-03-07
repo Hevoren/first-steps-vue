@@ -29,7 +29,9 @@ Vue.component('product', {
                 </ul>
                 
                 <p>Shipping: {{ shipping }}</p>
-
+                
+                <a :href="link">More products like this</a>
+                
                 <div
                         class="color-box"
                         v-for="(variant, index) in variants"
@@ -39,16 +41,11 @@ Vue.component('product', {
 
                 >
                 </div>
-
-                <div class="cart">
-                    <p>Cart({{ cart }})</p>
+                
+                <div style="display: flex;">
+                    <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
+                    <button v-on:click="removeFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Remove from cart</button>
                 </div>
-
-                <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
-
-                <button v-on:click="removeFromCart">Remove from cart</button>
-
-
             </div>
         </div>
  `,
@@ -83,13 +80,12 @@ Vue.component('product', {
     },
     methods: {
         addToCart() {
-            this.cart += 1
+            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
         },
 
         removeFromCart() {
-            if(this.cart > 0){
-                this.cart -= 1
-            }
+            this.$emit('remove-from-cart', this.variants[this.selectedVariant].variantId);
+
         },
 
         updateProduct(index) {
@@ -144,11 +140,63 @@ Vue.component('product-details', {
 })
 
 
+Vue.component('product-review', {
+    template: `
+        <form class="review-form" @submit.prevent="onSubmit">
+            <p>
+                <label for="name">Name:</label>
+                <input id="name" v-model="name" placeholder="name">
+            </p>
+
+            <p>
+                <label for="review">Review:</label>
+                <textarea id="review" v-model="review"></textarea>
+            </p>
+
+            <p>
+                <label for="rating">Rating:</label>
+                <select id="rating" v-model.number="rating">
+                    <option>5</option>
+                    <option>4</option>
+                    <option>3</option>
+                    <option>2</option>
+                    <option>1</option>
+                </select>
+            </p>
+
+            <p>
+                <input type="submit" value="Submit"> 
+            </p>
+        </form>
+
+ `,
+    data() {
+        return {
+            name: null
+        }
+    }
+})
+
+
+
 let app = new Vue({
     el: '#app',
     data: {
-        premium: true
+        premium: true,
+        cart: [],
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id);
+        },
+
+        removeToCart(id) {
+            this.cart.pop(id);
+
+        }
     }
 })
+
+
 
 

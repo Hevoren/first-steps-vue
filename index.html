@@ -12,11 +12,11 @@
 </head>
 <body>
     <div id="app">
-        <product :premium="premium"></product>
-        <product></product>
-        <product></product>
-
-        <a :href="link">More products like this</a>
+        <div class="cart">
+            <p>Cart({{ cart.length }})</p>
+        </div>
+        <product :premium="premium" @add-to-cart="updateCart" @remove-from-cart="removeToCart"></product>
+        <product-review></product-review>
     </div>
 </body>
 </html>

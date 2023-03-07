@@ -47,8 +47,9 @@ img {
 }
 
 button {
+    margin-left: 20px;
     margin-top: 30px;
-    border: none;
+    border-radius: 5px;
     background-color: #1E95EA;
     color: white;
     height: 40px;
@@ -89,5 +90,9 @@ textarea {
 }
 
 .outOfStock {
+    text-decoration: line-through;
+}
+
+.disabledButton {
     text-decoration: line-through;
 }
