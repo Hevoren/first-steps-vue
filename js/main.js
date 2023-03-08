@@ -23,16 +23,15 @@ Vue.component('product', {
                 <p v-if="inventory > 10 && inStock">In stock</p>
                 <p v-else-if="inventory <= 10 && inventory > 0 && inStock">Almost sold out!</p>
                 <p class="outOfStock" v-else>Out of stock</p>
-
+  
                 <span>{{ sale }}</span>
 
-                <product-details :details="details"></product-details>
+                <info-tabs :shipping="shipping" :details="details"></info-tabs>
 
                 <ul>
                     <li v-for="size in sizes">{{ size }}</li>
                 </ul>
                 
-                <p>Shipping: {{ shipping }}</p>
                 
                 <a :href="link">More products like this</a>
                 
@@ -284,6 +283,49 @@ Vue.component('product-tabs', {
         return {
             tabs: ['Reviews', 'Make a Review'],
             selectedTab: 'Reviews'  // устанавливается с помощью @click
+        }
+    }
+})
+
+
+Vue.component('info-tabs', {
+    props: {
+        shipping: {
+            required: true
+        },
+        details: {
+            type: Array,
+            required: true
+        }
+    },
+    template: `
+        <div>
+      
+        <ul>
+          <span class="tabs" 
+                :class="{ activeTab: selectedTab === tab }"
+                v-for="(tab, index) in tabs"
+                @click="selectedTab = tab"
+                :key="tab"
+          >{{ tab }}</span>
+        </ul>
+
+        <div v-show="selectedTab === 'Shipping'">
+            <p>{{ shipping }}</p>
+        </div>
+
+        <div v-show="selectedTab === 'Details'">
+            <ul>
+                <li v-for="detail in details">{{ detail }}</li>
+            </ul>
+        </div>
+    
+        </div>
+    `,
+    data() {
+        return {
+            tabs: ['Shipping', 'Details'],
+            selectedTab: 'Shipping'
         }
     }
 })
