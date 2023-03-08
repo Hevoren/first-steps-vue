@@ -96,3 +96,8 @@ textarea {
 .disabledButton {
     text-decoration: line-through;
 }
+
+.vote {
+    display: flex;
+    flex-direction: row;
+}
