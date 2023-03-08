@@ -1,3 +1,6 @@
+let eventBus = new Vue()
+
+
 Vue.component('product', {
     props: {
         premium: {
@@ -47,11 +50,7 @@ Vue.component('product', {
                     <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
                     <button v-on:click="removeFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Remove from cart</button>
                 </div>
-                <product-tabs :reviews="reviews"></product-tabs>
-                <div>
-                    <product-review @review-submitted="addReview"></product-review>
-                </div>
-
+            <product-tabs :reviews="reviews"></product-tabs>
             </div>
         </div>
  `,
@@ -100,9 +99,8 @@ Vue.component('product', {
             console.log(index);
         },
 
-        addReview(productReview) {
-            this.reviews.push(productReview)
-        }
+
+
 
     },
     computed: {
@@ -132,8 +130,14 @@ Vue.component('product', {
                 return 2.99
             }
         },
+    },
 
-    }
+
+    mounted() {
+        eventBus.$on('review-submitted', productReview => {
+            this.reviews.push(productReview)
+        })
+    },
 })
 
 
@@ -222,7 +226,7 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                this.$emit('review-submitted', productReview)
+                eventBus.$emit('review-submitted', productReview)
                 this.name = null
                 this.review = null
                 this.rating = null
@@ -260,10 +264,9 @@ Vue.component('product-tabs', {
                 {{ tab }}
             </span>
         </ul>
-        <div>
-            <h2>Reviews</h2>
+        <div v-show="selectedTab === 'Reviews'">
             <p v-if="!reviews.length">There are no reviews yet.</p>
-            <ul>
+            <ul v-else> 
                 <li v-for="review in reviews">
                     <p>{{ review.name }}</p>
                     <p>Rating: {{ review.rating }}</p>
@@ -271,6 +274,9 @@ Vue.component('product-tabs', {
                     <p>Recommend: {{ review.recommend }}</p>
                 </li>
             </ul>
+        </div>
+        <div v-show="selectedTab === 'Make a Review'">
+            <product-review></product-review>
         </div>
     </div>           
  `,
@@ -281,8 +287,6 @@ Vue.component('product-tabs', {
         }
     }
 })
-
-
 
 
 let app = new Vue({
@@ -302,3 +306,4 @@ let app = new Vue({
         }
     }
 })
+
