@@ -49,11 +49,12 @@ img {
 button {
     margin-left: 20px;
     margin-top: 30px;
-    border-radius: 5px;
+    border-radius: 15px;
+    border: none;
     background-color: #1E95EA;
     color: white;
     height: 40px;
-    width: 100px;
+    width: 70px;
     font-size: 14px;
 }
 

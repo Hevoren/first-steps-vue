@@ -49,8 +49,9 @@ Vue.component('product', {
                     <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
                     <button v-on:click="removeFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Remove from cart</button>
                 </div>
-            <product-tabs :reviews="reviews"></product-tabs>
+            
             </div>
+            <product-tabs :reviews="reviews"></product-tabs>
         </div>
  `,
     data() {
@@ -165,17 +166,17 @@ Vue.component('product-review', {
 
         <p>
             <label for="name">Name:</label>
-            <input id="name" v-model="name">
+            <input value="" id="name" v-model="name" >
         </p>
 
         <p>
             <label for="review">Review:</label>
-            <textarea id="review" v-model="review"></textarea>
+            <textarea value="" id="review" v-model="review"></textarea>
         </p>
 
         <p>
             <label for="rating">Rating:</label>
-            <select id="rating" v-model.number="rating">
+            <select value="" id="rating" v-model.number="rating">
                 <option>5</option>
                 <option>4</option>
                 <option>3</option>
@@ -265,15 +266,19 @@ Vue.component('product-tabs', {
             <div >
                 <p v-if="!reviews.length">There are no reviews yet.</p>
                 <ul v-else>
-                    
-                    <li v-for="review in reviews">
-                        <button style="color: red" v-if="reviews.length" v-on:click="editReview(review)" >Edit</button>
-                        <button style="color: red" v-if="reviews.length" v-on:click="falseEditReview" >Close Edit</button>
+                    <button style="color: red; " v-if="reviews.length" v-on:click="sortReview(reviews)" >Sort</button>
+                    <li v-for="review in reviews" v-on:click="sortReview(review)">
+                    <div style="display: flex; flex-direction: row">
+                        <button style="color: red; " v-if="reviews.length" v-on:click="editReview(review)" >Edit</button>
+                        <button style="color: red; " v-if="reviews.length" v-on:click="falseEditReview" >Close Edit</button>
+                        <button style="color: red; " v-if="reviews.length" v-on:click="deleteReview(review)" >Delete Review</button>
+                    </div>
                         <product-review v-if="editing"></product-review>
+                        <p>{{ review }}</p>
                         <p>{{ review.name }}</p>
-                        <p>Rating: {{ review.rating }}</p>
+                        <p v-if="review.rating != null">Rating: {{ review.rating }}</p>
                         <p>{{ review.review }}</p>
-                        <p>Recommend: {{ review.recommend }}</p>
+                        <p v-if="review.recommend != null">Recommend: {{ review.recommend }}</p>
                     </li>
                 </ul>
             </div>
@@ -282,28 +287,41 @@ Vue.component('product-tabs', {
             <product-review></product-review>
         </div>
     </div>           
- `,
+    `,
     data() {
+
         return {
             editing: false,
             tabs: ['Reviews', 'Make a Review'],
             review: {},
             selectedTab: 'Reviews'  // устанавливается с помощью @click
         }
+
     },
 
     methods: {
         editReview(review) {
             this.editing = true
             this.review = review
+            review.name = this.name
             console.log(review);
-
         },
-
 
         falseEditReview() {
             this.editing = false
+        },
+
+        deleteReview(review) {
+            review.name = null,
+            review.review = null,
+            review.rating = null,
+            review.recommend = null
+        },
+
+        sortReview(reviews) {
+            return this.reviews.sort
         }
+
     }
 })
 
