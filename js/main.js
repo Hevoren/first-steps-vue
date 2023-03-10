@@ -266,12 +266,13 @@ Vue.component('product-tabs', {
             <div >
                 <p v-if="!reviews.length">There are no reviews yet.</p>
                 <ul v-else>
-                    <button style="color: red; " v-if="reviews.length" v-on:click="sortReview(reviews)" >Sort</button>
+                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)" >Sort by reduce</button>
+                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)" >Sort by increase</button>
                     <li v-for="review in reviews" v-on:click="sortReview(review)">
                     <div style="display: flex; flex-direction: row">
-                        <button style="color: red; " v-if="reviews.length" v-on:click="editReview(review)" >Edit</button>
-                        <button style="color: red; " v-if="reviews.length" v-on:click="falseEditReview" >Close Edit</button>
-                        <button style="color: red; " v-if="reviews.length" v-on:click="deleteReview(review)" >Delete Review</button>
+                        <button style="color: black; " v-if="reviews.length" v-on:click="editReview(review)" >Edit</button>
+                        <button style="color: black; " v-if="reviews.length" v-on:click="falseEditReview" >Close Edit</button>
+                        <button style="color: black; " v-if="reviews.length" v-on:click="deleteReview(review)" >Delete Review</button>
                     </div>
                         <product-review v-if="editing"></product-review>
                         <p>{{ review }}</p>
@@ -318,8 +319,12 @@ Vue.component('product-tabs', {
             review.recommend = null
         },
 
-        sortReview(reviews) {
-            return this.reviews.sort
+        sortReviewByReduce() {
+            this.reviews.sort((a, b) => b.rating - a.rating)
+        },
+
+        sortReviewByIncrease() {
+            this.reviews.sort((a, b) => a.rating - b.rating)
         }
 
     }
