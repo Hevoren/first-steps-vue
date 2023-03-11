@@ -154,8 +154,11 @@ Vue.component('product-details', {
 
 
 Vue.component('product-review', {
-    template: `
+    props: {
 
+    },
+
+    template: `
     <form class="review-form" @submit.prevent="onSubmit">
         <p v-if="errors.length">
             <b>Please correct the following error(s):</b>
@@ -171,12 +174,12 @@ Vue.component('product-review', {
 
         <p>
             <label for="review">Review:</label>
-            <textarea value="" id="review" v-model="review"></textarea>
+            <textarea id="review" v-model="review"></textarea>
         </p>
 
         <p>
             <label for="rating">Rating:</label>
-            <select value="" id="rating" v-model.number="rating">
+            <select id="rating" v-model.number="rating">
                 <option>5</option>
                 <option>4</option>
                 <option>3</option>
@@ -204,14 +207,13 @@ Vue.component('product-review', {
  `,
     data() {
         return {
-            name: null,
-            review: null,
-            rating: null,
-            recommend: null,
+            name: "",
+            review: "",
+            rating: "",
+            recommend: "",
             errors: []
         }
     },
-
 
     methods:{
         onSubmit() {
@@ -250,7 +252,6 @@ Vue.component('product-tabs', {
         }
     },
 
-
     template: `
     <div>   
         <ul>
@@ -266,16 +267,16 @@ Vue.component('product-tabs', {
             <div >
                 <p v-if="!reviews.length">There are no reviews yet.</p>
                 <ul v-else>
-                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)" >Sort by reduce</button>
-                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)" >Sort by increase</button>
-                    <li v-for="review in reviews" v-on:click="sortReview(review)">
-                    <div style="display: flex; flex-direction: row">
-                        <button style="color: black; " v-if="reviews.length" v-on:click="editReview(review)" >Edit</button>
-                        <button style="color: black; " v-if="reviews.length" v-on:click="falseEditReview" >Close Edit</button>
-                        <button style="color: black; " v-if="reviews.length" v-on:click="deleteReview(review)" >Delete Review</button>
-                    </div>
-                        <product-review v-if="editing"></product-review>
-                        <p>{{ review }}</p>
+                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)">Sort by reduce</button>
+                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)">Sort by increase</button>
+                    <li v-for="(review, index) in reviews" v-if="reviews.length">
+                        <div style="display: flex; flex-direction: row">
+                            <button style="color: black;" v-if="reviews.length" v-on:click="editReview(review)">Edit</button>
+                            <button style="color: black;" v-if="reviews.length" v-on:click="falseEditReview">Close Edit</button>
+                            <button style="color: black;" v-if="reviews.length" v-on:click="deleteReview(reviews, index)" >Delete Review</button>
+                        </div>
+                        <product-review v-if="editing" :review="review"></product-review>
+                        <p v-if>{{ reviews }}</p>
                         <p>{{ review.name }}</p>
                         <p v-if="review.rating != null">Rating: {{ review.rating }}</p>
                         <p>{{ review.review }}</p>
@@ -305,18 +306,14 @@ Vue.component('product-tabs', {
             this.editing = true
             this.review = review
             review.name = this.name
-            console.log(review);
         },
 
         falseEditReview() {
             this.editing = false
         },
 
-        deleteReview(review) {
-            review.name = null,
-            review.review = null,
-            review.rating = null,
-            review.recommend = null
+        deleteReview(reviews, index) {
+            reviews.splice(index, 1)
         },
 
         sortReviewByReduce() {
