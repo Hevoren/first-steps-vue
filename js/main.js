@@ -174,7 +174,7 @@ Vue.component('product-review', {
 
         <p>
             <label for="review">Review:</label>
-            <textarea id="review" v-model="review"></textarea>
+            <textarea id="review" v-model="review" ></textarea>
         </p>
 
         <p>
@@ -211,7 +211,7 @@ Vue.component('product-review', {
             review: "",
             rating: "",
             recommend: "",
-            errors: []
+            errors: [],
         }
     },
 
@@ -219,12 +219,12 @@ Vue.component('product-review', {
         onSubmit() {
             this.errors = []
             if(this.name && this.review && this.rating && this.recommend) {
+
                 let productReview = {
                     name: this.name,
                     review: this.review,
                     rating: this.rating,
                     recommend: this.recommend
-
                 }
                 eventBus.$emit('review-submitted', productReview)
                 this.name = null
@@ -237,10 +237,8 @@ Vue.component('product-review', {
                 if(!this.rating) this.errors.push("Rating required.")
                 if(!this.recommend) this.errors.push("Recommendation required.")
             }
-        }
+        },
     }
-
-
 })
 
 
@@ -272,11 +270,10 @@ Vue.component('product-tabs', {
                     <li v-for="(review, index) in reviews" v-if="reviews.length">
                         <div style="display: flex; flex-direction: row">
                             <button style="color: black;" v-if="reviews.length" v-on:click="editReview(review)">Edit</button>
-                            <button style="color: black;" v-if="reviews.length" v-on:click="falseEditReview">Close Edit</button>
+                            <button style="color: black;" v-if="reviews.length" v-on:click="closeEdit">Close</button>
                             <button style="color: black;" v-if="reviews.length" v-on:click="deleteReview(reviews, index)" >Delete Review</button>
                         </div>
-                        <product-review v-if="editing" :review="review"></product-review>
-                        <p v-if>{{ reviews }}</p>
+                        <product-review v-if="editing"></product-review>
                         <p>{{ review.name }}</p>
                         <p v-if="review.rating != null">Rating: {{ review.rating }}</p>
                         <p>{{ review.review }}</p>
@@ -305,10 +302,9 @@ Vue.component('product-tabs', {
         editReview(review) {
             this.editing = true
             this.review = review
-            review.name = this.name
         },
 
-        falseEditReview() {
+        closeEdit(){
             this.editing = false
         },
 
@@ -349,7 +345,7 @@ Vue.component('info-tabs', {
                 :key="tab"
           >{{ tab }}</span>
         </ul>
-
+        
         <div v-show="selectedTab === 'Shipping'">
             <p>{{ shipping }}</p>
         </div>
