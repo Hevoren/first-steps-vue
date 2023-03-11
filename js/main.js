@@ -131,8 +131,8 @@ Vue.component('product', {
 
 
     mounted() {
-        eventBus.$on('review-submitted', productReview => {
-            this.reviews.push(productReview)
+        eventBus.$on('review-submitted', editedReview => {
+            this.reviews.push(editedReview)
         })
     },
 })
@@ -155,6 +155,14 @@ Vue.component('product-details', {
 
 Vue.component('product-review', {
     props: {
+        review: {
+            type: Object,
+            required: false
+        },
+        reviewId: {
+            type: Number,
+            required: false
+        }
 
     },
 
@@ -174,7 +182,7 @@ Vue.component('product-review', {
 
         <p>
             <label for="review">Review:</label>
-            <textarea id="review" v-model="review" ></textarea>
+            <textarea id="review" v-model="revieww" ></textarea>
         </p>
 
         <p>
@@ -208,37 +216,49 @@ Vue.component('product-review', {
     data() {
         return {
             name: "",
-            review: "",
+            revieww: "",
             rating: "",
             recommend: "",
             errors: [],
+            editMode: false,
         }
     },
 
     methods:{
         onSubmit() {
             this.errors = []
-            if(this.name && this.review && this.rating && this.recommend) {
+            if(this.name && this.revieww && this.rating && this.recommend) {
 
-                let productReview = {
+                let editedReview = {
                     name: this.name,
-                    review: this.review,
+                    revieww: this.revieww,
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                eventBus.$emit('review-submitted', productReview)
-                this.name = null
-                this.review = null
-                this.rating = null
-                this.recommend = null
+                eventBus.$emit('review-submitted', editedReview);
+                this.editMode = false;
             } else {
                 if(!this.name) this.errors.push("Name required.")
-                if(!this.review) this.errors.push("Review required.")
+                if(!this.revieww) this.errors.push("Review required.")
                 if(!this.rating) this.errors.push("Rating required.")
                 if(!this.recommend) this.errors.push("Recommendation required.")
             }
         },
-    }
+        cancelEdit() {
+            this.editMode = false;
+            this.name = this.review.name;
+            this.rating = this.review.rating;
+            this.revieww = this.review.revieww;
+            this.recommend = this.review.recommend;
+        },
+    },
+    mounted() {
+        console.log(this.$el)
+        this.name = this.review.name;
+        this.rating = this.review.rating;
+        this.revieww = this.review.revieww;
+        this.recommend = this.review.recommend;
+    },
 })
 
 
@@ -246,8 +266,9 @@ Vue.component('product-tabs', {
     props: {
         reviews: {
             type: Array,
-            required: false
-        }
+            required: false,
+            default: [],
+        },
     },
 
     template: `
@@ -256,6 +277,7 @@ Vue.component('product-tabs', {
             <span class="tab"
                 :class="{ activeTab: selectedTab === tab }"
                 v-for="(tab, index) in tabs"
+                :key="index" 
                 @click="selectedTab = tab"
             >
                 {{ tab }}
@@ -267,17 +289,17 @@ Vue.component('product-tabs', {
                 <ul v-else>
                     <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)">Sort by reduce</button>
                     <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)">Sort by increase</button>
-                    <li v-for="(review, index) in reviews" v-if="reviews.length">
+                    <li v-for="(review, index) in reviews" :key="index" v-if="reviews.length">
                         <div style="display: flex; flex-direction: row">
-                            <button style="color: black;" v-if="reviews.length" v-on:click="editReview(review)">Edit</button>
+                            <button style="color: black;" v-if="reviews.length" v-on:click="editReviewBtn">Edit</button>
                             <button style="color: black;" v-if="reviews.length" v-on:click="closeEdit">Close</button>
                             <button style="color: black;" v-if="reviews.length" v-on:click="deleteReview(reviews, index)" >Delete Review</button>
                         </div>
-                        <product-review v-if="editing"></product-review>
+                        <product-review v-if="editing" :review="review" :reviewId="index" @edit-review="editReview"></product-review>
                         <p>{{ review.name }}</p>
-                        <p v-if="review.rating != null">Rating: {{ review.rating }}</p>
-                        <p>{{ review.review }}</p>
-                        <p v-if="review.recommend != null">Recommend: {{ review.recommend }}</p>
+                        <p >Rating: {{ review.rating }}</p>
+                        <p>{{ review.revieww }}</p>
+                        <p >Recommend: {{ review.recommend }}</p>
                     </li>
                 </ul>
             </div>
@@ -292,16 +314,18 @@ Vue.component('product-tabs', {
         return {
             editing: false,
             tabs: ['Reviews', 'Make a Review'],
-            review: {},
             selectedTab: 'Reviews'  // устанавливается с помощью @click
         }
 
     },
 
     methods: {
-        editReview(review) {
+        editReviewBtn() {
             this.editing = true
-            this.review = review
+        },
+
+        editReview(reviewId, editedReview) {
+            this.reviews.splice(reviewId, 1, editedReview);
         },
 
         closeEdit(){
