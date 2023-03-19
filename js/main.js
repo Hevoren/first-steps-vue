@@ -96,7 +96,14 @@ Vue.component('product', {
 
         updateProduct(index) {
             this.selectedVariant = index;
-            console.log(index);
+        },
+        redSubE(task){
+            console.log(123)
+            let goingRedTask = this.reviews[task.indexReview]
+            goingRedTask.name = task.redProductReview.redName
+            goingRedTask.desc = task.redProductReview.redDesc
+            goingRedTask.rating = task.redProductReview.redRating
+            console.log(goingRedTask)
         },
 
     },
@@ -131,8 +138,12 @@ Vue.component('product', {
 
 
     mounted() {
-        eventBus.$on('review-submitted', editedReview => {
-            this.reviews.push(editedReview)
+        eventBus.$on('review-submitted', productReview => {
+            this.reviews.push(productReview)
+            console.log(this.reviews)
+        })
+        eventBus.$on('redSub', (task) => {
+            this.redSubE(task)
         })
     },
 })
@@ -145,6 +156,7 @@ Vue.component('product-details', {
             required: true
         }
     },
+
     template: `
     <ul>
       <li v-for="detail in details">{{ detail }}</li>
@@ -154,40 +166,20 @@ Vue.component('product-details', {
 
 
 Vue.component('product-review', {
-    props: {
-        review: {
-            type: Object,
-            required: false
-        },
-        reviewId: {
-            type: Number,
-            required: false
-        }
-
-    },
 
     template: `
     <form class="review-form" @submit.prevent="onSubmit">
-        <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-            <ul>
-                <li v-for="error in errors">{{ error }}</li>
-            </ul>
-        </p>
-
         <p>
             <label for="name">Name:</label>
-            <input value="" id="name" v-model="name" >
+            <input value="" id="name" v-model="name" required>
         </p>
-
         <p>
             <label for="review">Review:</label>
-            <textarea id="review" v-model="revieww" ></textarea>
+            <textarea id="review" v-model="desc" required ></textarea>
         </p>
-
         <p>
             <label for="rating">Rating:</label>
-            <select id="rating" v-model.number="rating">
+            <select id="rating" v-model.number="rating" required>
                 <option>5</option>
                 <option>4</option>
                 <option>3</option>
@@ -195,17 +187,6 @@ Vue.component('product-review', {
                 <option>1</option>
             </select>
         </p>
-        
-        <p>Would you recommend this product?</p>
-        <label class="vote" for="recommend">
-            Yes
-            <input id="recommend" type="radio" value="Yes" v-model="recommend"/>
-        </label>
-        <label class="vote" for="recommend">
-            No
-            <input id="recommend" type="radio" value="No" v-model="recommend"/>
-        </label>
-
         <p>
             <input type="submit" value="Submit"> 
         </p>
@@ -215,49 +196,40 @@ Vue.component('product-review', {
  `,
     data() {
         return {
-            name: "",
-            revieww: "",
-            rating: "",
-            recommend: "",
+            name: null,
+            desc: null,
+            rating: null,
+            editStatus: false,
             errors: [],
-            editMode: false,
+            idAr: 1,
         }
     },
-
-    methods:{
+    methods: {
         onSubmit() {
-            this.errors = []
-            if(this.name && this.revieww && this.rating && this.recommend) {
-
-                let editedReview = {
+            this.errors = [];
+            if (this.name && this.desc && this.rating){
+                let productReview = {
                     name: this.name,
-                    revieww: this.revieww,
+                    desc: this.desc,
                     rating: this.rating,
-                    recommend: this.recommend
-                }
-                eventBus.$emit('review-submitted', editedReview);
-                this.editMode = false;
+                    idAr: this.idAr,
+                    editStatus: this.editStatus
+                };
+                eventBus.$emit("review-submitted", productReview);
+                this.name = null;
+                this.desc = null;
+                this.rating = null;
+                this.errors = [];
             } else {
-                if(!this.name) this.errors.push("Name required.")
-                if(!this.revieww) this.errors.push("Review required.")
-                if(!this.rating) this.errors.push("Rating required.")
-                if(!this.recommend) this.errors.push("Recommendation required.")
+                if (!this.name) this.errors.push("Name required.")
+                if (!this.desc) this.errors.push("Review required.")
+                if (!this.rating) this.errors.push("Rating required.")
             }
         },
-        cancelEdit() {
-            this.editMode = false;
-            this.name = this.review.name;
-            this.rating = this.review.rating;
-            this.revieww = this.review.revieww;
-            this.recommend = this.review.recommend;
-        },
-    },
-    mounted() {
-        console.log(this.$el)
-        this.name = this.review.name;
-        this.rating = this.review.rating;
-        this.revieww = this.review.revieww;
-        this.recommend = this.review.recommend;
+        idUp(){
+            this.idAr++
+        }
+
     },
 })
 
@@ -267,73 +239,101 @@ Vue.component('product-tabs', {
         reviews: {
             type: Array,
             required: false,
-            default: [],
         },
     },
 
     template: `
-    <div>   
-        <ul>
-            <span class="tab"
-                :class="{ activeTab: selectedTab === tab }"
-                v-for="(tab, index) in tabs"
-                :key="index" 
-                @click="selectedTab = tab"
-            >
-                {{ tab }}
-            </span>
-        </ul>
-        <div v-show="selectedTab === 'Reviews'">
-            <div >
-                <p v-if="!reviews.length">There are no reviews yet.</p>
-                <ul v-else>
-                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)">Sort by reduce</button>
-                    <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)">Sort by increase</button>
-                    <li v-for="(review, index) in reviews" :key="index" v-if="reviews.length">
-                        <div style="display: flex; flex-direction: row">
-                            <button style="color: black;" v-if="reviews.length" v-on:click="editReviewBtn">Edit</button>
-                            <button style="color: black;" v-if="reviews.length" v-on:click="closeEdit">Close</button>
-                            <button style="color: black;" v-if="reviews.length" v-on:click="deleteReview(reviews, index)" >Delete Review</button>
-                        </div>
-                        <product-review v-if="editing" :review="review" :reviewId="index" @edit-review="editReview"></product-review>
-                        <p>{{ review.name }}</p>
-                        <p >Rating: {{ review.rating }}</p>
-                        <p>{{ review.revieww }}</p>
-                        <p >Recommend: {{ review.recommend }}</p>
-                    </li>
-                </ul>
+        <div>   
+            <ul>
+                <span class="tab"
+                    :class="{ activeTab: selectedTab === tab }"
+                    v-for="(tab, index) in tabs"
+                    @click="selectedTab = tab"
+                >
+                    {{ tab }}
+                </span>
+            </ul>
+            <div v-show="selectedTab === 'Reviews'">
+                <div >
+                    <p v-if="!reviews.length">There are no reviews yet.</p>
+                    <ul v-else>
+                        <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByReduce(reviews)">Sort by reduce</button>
+                        <button style="color: black; " v-if="reviews.length" v-on:click="sortReviewByIncrease(reviews)">Sort by increase</button>
+                        
+                        <li v-for="(review, indexReview) in reviews" v-if="reviews.length">
+                                <button style="color: black;" v-if="reviews.length"  @click="deleteReview(reviews, indexReview)" >Delete Review</button>
+                                <button style="color: black; " @click="editReviewStatus(review, indexReview, reviews)">Edit</button>
+                            <form v-show="review.editStatus === true" @submit.prevent="onSubmit(indexReview)">
+                                <p>
+                                    <label for="name">Name:</label>
+                                    <input value="" id="name" v-model="redName" required>
+                                </p>
+                                <p>
+                                    <label for="review">Review:</label>
+                                    <textarea id="review" v-model="redDesc" required ></textarea>
+                                </p>
+                                <p>
+                                    <label for="rating">Rating:</label>
+                                    <select id="rating" v-model.number="redRating" required>
+                                        <option>5</option>
+                                        <option>4</option>
+                                        <option>3</option>
+                                        <option>2</option>
+                                        <option>1</option>
+                                    </select>
+                                </p>
+                                <p>
+                                    <input type="submit" value="Submit"> 
+                                </p>
+                            </form>
+                            <p>{{ review.name }}</p>
+                            <p >Rating: {{ review.rating }}</p>
+                            <p>{{ review.desc }}</p>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <div v-show="selectedTab === 'Make a Review'">
-            <product-review></product-review>
-        </div>
-    </div>           
+            <div v-show="selectedTab === 'Make a Review'">
+                <product-review></product-review>
+            </div>
+        </div>           
     `,
+
     data() {
-
         return {
-            editing: false,
             tabs: ['Reviews', 'Make a Review'],
-            selectedTab: 'Reviews'  // устанавливается с помощью @click
+            selectedTab: 'Reviews',
+            redName: null,
+            redDesc: null,
+            redRating: null,
         }
-
     },
 
     methods: {
-        editReviewBtn() {
-            this.editing = true
+        onSubmit(indexReview) {
+            if (this.redName && this.redDesc && this.redRating){
+                let redProductReview = {
+                    redName: this.redName,
+                    redDesc: this.redDesc,
+                    redRating: this.redRating,
+                };
+                console.log("red", redProductReview)
+                eventBus.$emit("redSub", {redProductReview, indexReview});
+                this.redName = null;
+                this.redDesc = null;
+                this.redRating = null;
+            }
         },
 
-        editReview(reviewId, editedReview) {
-            this.reviews.splice(reviewId, 1, editedReview);
+        editReviewStatus(review, indexReview, reviews){
+            review.editStatus = !review.editStatus
+            console.log("index", indexReview)
+            console.log(review.editStatus)
+            console.log("reviews", reviews)
         },
 
-        closeEdit(){
-            this.editing = false
-        },
-
-        deleteReview(reviews, index) {
-            reviews.splice(index, 1)
+        deleteReview(reviews, indexReview) {
+            reviews.splice(indexReview, 1)
         },
 
         sortReviewByReduce() {
@@ -343,8 +343,9 @@ Vue.component('product-tabs', {
         sortReviewByIncrease() {
             this.reviews.sort((a, b) => a.rating - b.rating)
         }
+    },
 
-    }
+
 })
 
 
